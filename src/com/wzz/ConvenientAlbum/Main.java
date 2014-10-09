@@ -6,6 +6,7 @@ import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -19,7 +20,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import com.wzz.ConvenientAlbum.adapter.DrawerMenuListAdapter;
 import com.wzz.ConvenientAlbum.fragment.FirstFragment;
+import com.wzz.ConvenientAlbum.util.Const;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class Main extends Activity {
@@ -70,11 +73,42 @@ public class Main extends Activity {
         }
         switch (item.getItemId()) {
             case R.id.camera:
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                startActivity(intent);
+                openCamera();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void openCamera() {
+        String path = Const.CAMERA_PATH;
+        createCameraDirectory(path);
+        File photoFile = new File(path, System.currentTimeMillis() + ".jpg");
+        Uri photoUri = Uri.fromFile(photoFile);
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+        startActivityForResult(intent, Const.CAMERA_REQUEST_CODE);
+    }
+
+    /**
+     * 创建相机文件夹
+     * @param path 文件夹路径
+     * @return 是否创建 0：已存在， 1：创建成功， -1：创建失败
+     */
+    private int createCameraDirectory(String path) {
+        File dir = new File(path);
+        if (!dir.exists()) {
+            if (dir.mkdir()) {
+                return 1;
+            } else {
+                return -1;
+            }
+        }
+        return 0;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
