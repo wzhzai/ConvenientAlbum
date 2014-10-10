@@ -7,12 +7,35 @@
     <uses-sdk android:minSdkVersion="15"/>
     <!--SD卡写入权限-->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!--通过WiFi或移动基站的方式获取用户错略的经纬度信息-->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
             android:name=".application.ConvenientApp"
             android:label="@string/app_name"
             android:icon="@drawable/ic_launcher"
             android:theme="@android:style/Theme.Holo.Light"
             >
+
+        <service
+                android:name="com.baidu.location.f"
+                android:enabled="true"
+                android:process=":remote" >
+            <intent-filter>
+                <action android:name="com.baidu.location.service_v2.2" >
+                </action>
+            </intent-filter>
+        </service>
+
+        <!-- meta-data需要写在application中 -->
+        <meta-data
+                android:name="com.baidu.lbsapi.API_KEY"
+                android:value="IbmIiVdlj3tlFGLkrNQCbMew" />
+
         <activity
                 android:name="Main"
                 android:label="@string/app_name">

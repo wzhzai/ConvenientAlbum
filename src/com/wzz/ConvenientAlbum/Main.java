@@ -22,6 +22,7 @@ import android.widget.Toast;
 import com.wzz.ConvenientAlbum.adapter.DrawerMenuListAdapter;
 import com.wzz.ConvenientAlbum.fragment.FirstFragment;
 import com.wzz.ConvenientAlbum.util.Const;
+import com.wzz.ConvenientAlbum.util.LocationController;
 import com.wzz.ConvenientAlbum.util.Utils;
 
 import java.io.File;
@@ -79,6 +80,10 @@ public class Main extends Activity {
         switch (item.getItemId()) {
             case R.id.camera:
                 openCamera();
+                break;
+            case R.id.location:
+                LocationController controller = new LocationController(this);
+                controller.start();
                 break;
         }
         return super.onOptionsItemSelected(item);
