@@ -4,4 +4,6 @@
     <string name="drawer_open">drawer_open</string>
     <string name="drawer_close">drawer_close</string>
     <string name="camera">相机</string>
+    <string name="sd_card_error">存储器状态获取失败，请检查SD卡</string>
+    <string name="photo_save_to">照片已保存至\n</string>
 </resources>

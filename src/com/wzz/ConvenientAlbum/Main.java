@@ -18,9 +18,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 import com.wzz.ConvenientAlbum.adapter.DrawerMenuListAdapter;
 import com.wzz.ConvenientAlbum.fragment.FirstFragment;
 import com.wzz.ConvenientAlbum.util.Const;
+import com.wzz.ConvenientAlbum.util.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -32,6 +34,9 @@ public class Main extends Activity {
     private DrawerLayout drawerLayout;
     private ListView drawerList;
     private ArrayList<String> menuContent;
+
+    private String photoWholePath;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,8 +86,12 @@ public class Main extends Activity {
 
     private void openCamera() {
         String path = Const.CAMERA_PATH;
-        createCameraDirectory(path);
-        File photoFile = new File(path, System.currentTimeMillis() + ".jpg");
+        if (createCameraDirectory(path) == Const.COMMON_FAIL) {
+            Utils.toastSDCardError(this);
+        }
+        String photoName = System.currentTimeMillis() + ".jpg";
+        photoWholePath = path + photoName;
+        File photoFile = new File(path, photoName);
         Uri photoUri = Uri.fromFile(photoFile);
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
@@ -95,19 +104,33 @@ public class Main extends Activity {
      * @return 是否创建 0：已存在， 1：创建成功， -1：创建失败
      */
     private int createCameraDirectory(String path) {
+
+        if (!Utils.hasSDCard()) {
+            return Const.COMMON_FAIL;
+        }
+
         File dir = new File(path);
         if (!dir.exists()) {
             if (dir.mkdir()) {
-                return 1;
+                return Const.COMMON_SUCCESS;
             } else {
-                return -1;
+                return Const.COMMON_FAIL;
             }
         }
-        return 0;
+        return Const.COMMON_NO_CHANGE;
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode == RESULT_OK) {
+            switch (requestCode) {
+                case Const.CAMERA_REQUEST_CODE:
+                    Toast.makeText(this, getString(R.string.photo_save_to) + photoWholePath, Toast.LENGTH_SHORT).show();
+                    break;
+                default:
+                    break;
+            }
+        }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
