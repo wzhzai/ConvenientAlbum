@@ -3,4 +3,8 @@
           android:icon="@drawable/camera_selector"
           android:title="@string/camera"
           android:showAsAction="ifRoom|withText" />
+    <item android:id="@+id/location"
+          android:icon="@drawable/location_selector"
+          android:title="@string/location"
+          android:showAsAction="always|withText" />
 </menu>
