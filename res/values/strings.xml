@@ -7,4 +7,6 @@
     <string name="location">定位</string>
     <string name="sd_card_error">存储器状态获取失败，请检查SD卡</string>
     <string name="photo_save_to">照片已保存至\n</string>
+    <string name="location_success_hint">定位成功，您所在的位置是\n</string>
+    <string name="location_fail_hint">sorry，定位失败，请检查网络</string>
 </resources>

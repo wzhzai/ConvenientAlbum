@@ -1,10 +1,12 @@
 package com.wzz.ConvenientAlbum.util;
 
 import android.content.Context;
+import android.widget.Toast;
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.wzz.ConvenientAlbum.R;
 
 /**
  * Created by WANGZHENGZE on 2014/10/10.
@@ -15,7 +17,7 @@ public class LocationController implements BDLocationListener {
     private Context context;
     private static final int SCAN_SPAN = 5000;
     private static final int TIMEOUT = 10000;
-    private static final int SUCCESS = 161;
+    private static final int LOCATION_SUCCESS = 161;
 
     public LocationController(Context context) {
         this.context = context;
@@ -24,9 +26,11 @@ public class LocationController implements BDLocationListener {
 
     @Override
     public void onReceiveLocation(BDLocation bdLocation) {
-        if (bdLocation.getLocType() == SUCCESS) {
+        if (bdLocation.getLocType() == LOCATION_SUCCESS) {
+            Toast.makeText(context, context.getString(R.string.location_success_hint) + bdLocation.getAddrStr(), Toast.LENGTH_SHORT).show();
             Log.e("location", bdLocation.getAddrStr());
         } else {
+            Toast.makeText(context, context.getString(R.string.location_fail_hint), Toast.LENGTH_SHORT).show();
             Log.e("location", "fail:" + bdLocation.getLocType());
         }
         client.stop();
