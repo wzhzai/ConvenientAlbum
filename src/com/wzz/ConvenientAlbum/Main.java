@@ -20,15 +20,21 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 import com.wzz.ConvenientAlbum.adapter.DrawerMenuListAdapter;
+import com.wzz.ConvenientAlbum.bean.LocationInfoBean;
+import com.wzz.ConvenientAlbum.bean.PhotoInfoBean;
 import com.wzz.ConvenientAlbum.fragment.FirstFragment;
+import com.wzz.ConvenientAlbum.interfaces.INotifyDataSetChanged;
+import com.wzz.ConvenientAlbum.sqlite.DBManage;
 import com.wzz.ConvenientAlbum.util.Const;
 import com.wzz.ConvenientAlbum.util.LocationController;
 import com.wzz.ConvenientAlbum.util.Utils;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
-public class Main extends Activity {
+public class Main extends Activity implements INotifyDataSetChanged {
     private ActionBarHelper actionBarHelper;
     private ActionBarDrawerToggle drawerToggle;
 
@@ -36,7 +42,8 @@ public class Main extends Activity {
     private ListView drawerList;
     private ArrayList<String> menuContent;
 
-    private String photoWholePath;
+    private LocationInfoBean locationInfoBean;
+    private PhotoInfoBean photoInfoBean;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,6 +62,16 @@ public class Main extends Activity {
         drawerToggle = new ActionBarDrawerToggle(this, drawerLayout, R.drawable.ic_drawer, R.string.drawer_open, R.string.drawer_close);
         if (savedInstanceState == null) {
             setFragment(0);
+        }
+        String s;
+        if (!(s = Utils.getString(this, "recent_location", "")).isEmpty()) {
+            locationInfoBean = new LocationInfoBean();
+            String[] temp = s.split(",");
+            locationInfoBean.setLongitude(Double.valueOf(temp[0]));
+            locationInfoBean.setLatitude(Double.valueOf(temp[1]));
+            locationInfoBean.setProvince(temp[2]);
+            locationInfoBean.setCity(temp[3]);
+            locationInfoBean.setOthers(temp[4]);
         }
 
     }
@@ -82,25 +99,39 @@ public class Main extends Activity {
                 openCamera();
                 break;
             case R.id.location:
-                LocationController controller = new LocationController(this);
-                controller.start();
+                startLocation();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * 启动相机
+     */
     private void openCamera() {
-        String path = Const.CAMERA_PATH;
-        if (createCameraDirectory(path) == Const.COMMON_FAIL) {
+        if (locationInfoBean == null) {
+            startLocation();
+        }
+        photoInfoBean = new PhotoInfoBean();
+        photoInfoBean.setPath(Const.CAMERA_PATH);
+        if (createCameraDirectory(photoInfoBean.getPath()) == Const.COMMON_FAIL) {
             Utils.toastSDCardError(this);
         }
-        String photoName = System.currentTimeMillis() + ".jpg";
-        photoWholePath = path + photoName;
-        File photoFile = new File(path, photoName);
+        SimpleDateFormat format = new SimpleDateFormat("yyyyMMddHHmmss");
+        photoInfoBean.setName(format.format(new Date()) + ".jpg");
+        File photoFile = new File(photoInfoBean.getPath(), photoInfoBean.getName());
         Uri photoUri = Uri.fromFile(photoFile);
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
         startActivityForResult(intent, Const.CAMERA_REQUEST_CODE);
+    }
+
+    /**
+     * 启动定位
+     */
+    private void startLocation() {
+        LocationController controller = new LocationController(this, this);
+        controller.start();
     }
 
     /**
@@ -130,7 +161,13 @@ public class Main extends Activity {
         if (resultCode == RESULT_OK) {
             switch (requestCode) {
                 case Const.CAMERA_REQUEST_CODE:
-                    Toast.makeText(this, getString(R.string.photo_save_to) + photoWholePath, Toast.LENGTH_SHORT).show();
+                    if (locationInfoBean == null) {
+                        locationInfoBean = new LocationInfoBean();
+                    }
+                    locationInfoBean.setPath(photoInfoBean.getPath());
+                    locationInfoBean.setName(photoInfoBean.getName());
+                    DBManage.getInstance(this).saveLocation(locationInfoBean);
+                    Toast.makeText(this, getString(R.string.photo_save_to) + photoInfoBean.getPath() + photoInfoBean.getName(), Toast.LENGTH_SHORT).show();
                     break;
                 default:
                     break;
@@ -143,6 +180,13 @@ public class Main extends Activity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         drawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void notifyDataSetChanged(int what, int status, Object value, int arg1, int arg2) {
+        if (what == Const.FROM_LOCATION) {
+            locationInfoBean = (LocationInfoBean) value;
+        }
     }
 
     private class DrawerItemClickListener implements ListView.OnItemClickListener {

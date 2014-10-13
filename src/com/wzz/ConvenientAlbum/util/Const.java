@@ -9,6 +9,7 @@ import java.io.File;
  */
 public class Const {
     public static final int FRAGMENT_ALBUM = 0;
+    public static final int FROM_LOCATION = 501;
     public static final int CAMERA_REQUEST_CODE = 101;
     public static final String APP_NAME = "convenientAlbum";
     public static final String SD_CARD = Environment.getExternalStorageDirectory().getAbsolutePath();
